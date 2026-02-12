@@ -12,24 +12,26 @@ export default function Header() {
           </div>
 
           {/* Desktop sign in links */}
-          <ul className="flex flex-1 items-center justify-end gap-3">
-            <li>
-              <Link
-                href="/signin"
-                className="btn-sm bg-white text-gray-800 shadow-sm hover:bg-gray-50"
-              >
-                Login
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/signup"
-                className="btn-sm bg-gray-800 text-gray-200 shadow-sm hover:bg-gray-900"
-              >
-                Register
-              </Link>
-            </li>
-          </ul>
+          <nav className="flex items-center gap-6">
+            <a href="#services" className="text-sm">
+              Servicios
+            </a>
+            <a href="#process" className="text-sm">
+              Proceso
+            </a>
+            <a href="#cases" className="text-sm">
+              Casos
+            </a>
+            <a href="#contact" className="text-sm">
+              Contacto
+            </a>
+            <a
+              href="#contact"
+              className="ml-2 rounded-md bg-black px-4 py-2 text-sm text-white"
+            >
+              Agendar llamada
+            </a>
+          </nav>
         </div>
       </div>
     </header>
