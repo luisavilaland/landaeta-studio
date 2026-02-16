@@ -1,5 +1,9 @@
+"use client";
+
 import Link from "next/link";
 import Logo from "./logo";
+import { track } from "@/lib/gtag";
+
 
 export default function Header() {
   return (
@@ -13,33 +17,27 @@ export default function Header() {
 
           {/* Desktop sign in links */}
           <nav className="flex items-center gap-6">
-            <a
-              href="#services"
-              className="text-sm text-gray-700 hover:text-gray-900"
-            >
+            <a href="#services" className="text-sm">
               Servicios
             </a>
-            <a
-              href="#process"
-              className="text-sm text-gray-700 hover:text-gray-900"
-            >
+            <a href="#process" className="text-sm">
               Proceso
             </a>
-            <a
-              href="#cases"
-              className="text-sm text-gray-700 hover:text-gray-900"
-            >
+            <a href="#cases" className="text-sm">
               Casos
             </a>
-            <a
-              href="#contact"
-              className="text-sm text-gray-700 hover:text-gray-900"
-            >
+            <a href="#contact" className="text-sm">
               Contacto
             </a>
             <a
               href="#contact"
-              className="ml-2 rounded-md bg-black px-4 py-2 text-sm text-white hover:bg-gray-900"
+              onClick={() =>
+                track("cta_click", {
+                  location: "header",
+                  label: "agendar_llamada",
+                })
+              }
+              className="ml-2 rounded-md bg-black px-4 py-2 text-sm text-white"
             >
               Agendar llamada
             </a>
