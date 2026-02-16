@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { track } from "@/lib/gtag";
+
 
 type Status = "idle" | "loading" | "success" | "error";
 
@@ -40,7 +42,9 @@ export default function Contact() {
       }
 
       setStatus("success");
+      track("generate_lead", { method: "contact_form" });
       form.reset();
+
     } catch {
       setStatus("error");
       setError("No se pudo enviar. Revisá tu conexión e intentá de nuevo.");
