@@ -1,9 +1,9 @@
 export const metadata = {
-  title: "Home - Simple",
-  description: "Page description",
+  title: "Landaeta Studio | Ads y Analítica para eCommerce",
+  description: "Mejroamos performance en Meta/Google Ads y transformamos datos en decisiones con tracking, dahsboards y optimización de embudos de venta para eCommerce.",
 };
 
-import Hero from "@/components/hero-home";
+import HeroHome from "@/components/hero-home";
 import BusinessCategories from "@/components/business-categories";
 import FeaturesPlanet from "@/components/features-planet";
 import LargeTestimonial from "@/components/large-testimonial";
@@ -12,7 +12,7 @@ import Cta from "@/components/cta";
 export default function Home() {
   return (
     <>
-      <Hero />
+      <HeroHome />
       <BusinessCategories />
       <FeaturesPlanet />
       <LargeTestimonial />

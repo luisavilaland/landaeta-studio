@@ -13,21 +13,33 @@ export default function Header() {
 
           {/* Desktop sign in links */}
           <nav className="flex items-center gap-6">
-            <a href="#services" className="text-sm">
+            <a
+              href="#services"
+              className="text-sm text-gray-700 hover:text-gray-900"
+            >
               Servicios
             </a>
-            <a href="#process" className="text-sm">
+            <a
+              href="#process"
+              className="text-sm text-gray-700 hover:text-gray-900"
+            >
               Proceso
             </a>
-            <a href="#cases" className="text-sm">
+            <a
+              href="#cases"
+              className="text-sm text-gray-700 hover:text-gray-900"
+            >
               Casos
             </a>
-            <a href="#contact" className="text-sm">
+            <a
+              href="#contact"
+              className="text-sm text-gray-700 hover:text-gray-900"
+            >
               Contacto
             </a>
             <a
               href="#contact"
-              className="ml-2 rounded-md bg-black px-4 py-2 text-sm text-white"
+              className="ml-2 rounded-md bg-black px-4 py-2 text-sm text-white hover:bg-gray-900"
             >
               Agendar llamada
             </a>
