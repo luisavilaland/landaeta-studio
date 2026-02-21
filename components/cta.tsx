@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Stripes from "@/public/images/stripes-dark.svg";
+import CalButton from "@/components/cal-button";
 
 export default function Cta() {
   return (
@@ -41,17 +42,14 @@ export default function Cta() {
             </p>
 
             <div className="mx-auto max-w-xs sm:flex sm:max-w-none sm:justify-center gap-4">
-              <a
-                href="#contact"
-                className="btn group mb-4 w-full bg-linear-to-t from-blue-600 to-blue-500 bg-[length:100%_100%] bg-[bottom] text-white shadow-sm hover:bg-[length:100%_150%] sm:mb-0 sm:w-auto"
-              >
+              <CalButton className="btn group mb-4 w-full bg-linear-to-t from-blue-600 to-blue-500 bg-[length:100%_100%] bg-[bottom] text-white shadow-sm hover:bg-[length:100%_150%] sm:mb-0 sm:w-auto">
                 <span className="relative inline-flex items-center">
                   Agendar llamada{" "}
                   <span className="ml-1 tracking-normal text-blue-300 transition-transform group-hover:translate-x-0.5">
                     -&gt;
                   </span>
                 </span>
-              </a>
+              </CalButton>
 
               <a
                 href="#services"
