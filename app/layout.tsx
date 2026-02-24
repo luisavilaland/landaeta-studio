@@ -1,5 +1,7 @@
 import "./css/style.css";
 
+import MetaPixel from "@/components/meta-pixel";
+
 import { Inter } from "next/font/google";
 import GoogleAnalytics from "@/components/google-analytics";
 
@@ -72,6 +74,7 @@ export default function RootLayout({
         </div>
 
         <GoogleAnalytics />
+        <MetaPixel />         
       </body>
     </html>
   );
