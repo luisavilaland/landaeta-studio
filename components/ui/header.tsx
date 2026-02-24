@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Logo from "./logo";
 import { track } from "@/lib/gtag";
-
+import CalButton from "@/components/cal-button";
 
 export default function Header() {
   return (
@@ -15,32 +15,31 @@ export default function Header() {
             <Logo />
           </div>
 
-          {/* Desktop sign in links */}
+          {/* Nav */}
           <nav className="flex items-center gap-6">
-            <a href="#services" className="text-sm">
+            <Link href="/servicios" className="text-sm transition hover:text-gray-600">
               Servicios
-            </a>
-            <a href="#process" className="text-sm">
+            </Link>
+            <a href="#process" className="text-sm transition hover:text-gray-600">
               Proceso
             </a>
-            <a href="#cases" className="text-sm">
+            <a href="#cases" className="text-sm transition hover:text-gray-600">
               Casos
             </a>
-            <a href="#contact" className="text-sm">
+            <a href="#contact" className="text-sm transition hover:text-gray-600">
               Contacto
             </a>
-            <a
-              href="#contact"
+            <CalButton
               onClick={() =>
                 track("cta_click", {
                   location: "header",
                   label: "agendar_llamada",
                 })
               }
-              className="ml-2 rounded-md bg-black px-4 py-2 text-sm text-white"
+              className="ml-2 rounded-md bg-black px-4 py-2 text-sm text-white hover:bg-gray-800 transition-colors"
             >
               Agendar llamada
-            </a>
+            </CalButton>
           </nav>
         </div>
       </div>

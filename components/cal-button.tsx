@@ -6,9 +6,10 @@ import { useEffect } from "react";
 interface CalButtonProps {
   className?: string;
   children?: React.ReactNode;
+  onClick?: () => void; 
 }
 
-export default function CalButton({ className, children }: CalButtonProps) {
+export default function CalButton({ className, children, onClick }: CalButtonProps) {
   useEffect(() => {
     (async function () {
       const cal = await getCalApi({ namespace: "diagnostico" });
@@ -37,6 +38,7 @@ export default function CalButton({ className, children }: CalButtonProps) {
       data-cal-link="landaetastudio/diagnostico"
       data-cal-config='{"layout":"month_view"}'
       className={className}
+      onClick={onClick}       
     >
       {children}
     </button>
