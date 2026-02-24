@@ -17,16 +17,31 @@ export default function Header() {
 
           {/* Nav */}
           <nav className="flex items-center gap-6">
-            <Link href="/servicios" className="text-sm transition hover:text-gray-600">
+            <Link
+              href="/servicios"
+              className="text-sm transition hover:text-gray-600"
+            >
               Servicios
             </Link>
-            <a href="#process" className="text-sm transition hover:text-gray-600">
+            <Link
+              href="/blog"
+              className="text-sm transition hover:text-gray-600"
+            >
+              Blog
+            </Link>
+            <a
+              href="#process"
+              className="text-sm transition hover:text-gray-600"
+            >
               Proceso
             </a>
             <a href="#cases" className="text-sm transition hover:text-gray-600">
               Casos
             </a>
-            <a href="#contact" className="text-sm transition hover:text-gray-600">
+            <a
+              href="#contact"
+              className="text-sm transition hover:text-gray-600"
+            >
               Contacto
             </a>
             <CalButton
