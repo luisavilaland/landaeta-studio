@@ -1,0 +1,87 @@
+---
+title: "GA4 para eCommerce: los eventos que necesitás medir desde el día uno"
+description: "GA4 tiene cientos de eventos posibles pero solo algunos realmente importan para un eCommerce. Te explico cuáles son, qué significan y cómo implementarlos con GTM."
+date: "2026-02-10"
+category: "Analytics"
+---
+
+Muchos eCommerce tienen GA4 instalado pero solo miden pageviews. Es como tener un auto de Fórmula 1 y usarlo para ir al supermercado — estás desaprovechando la herramienta más poderosa que tenés gratis.
+
+## Por qué GA4 es distinto a Universal Analytics
+
+Si venías usando Universal Analytics (el GA anterior), GA4 puede parecer confuso al principio. La diferencia fundamental es que GA4 está basado en **eventos**, no en sesiones y pageviews.
+
+Esto es una ventaja enorme para eCommerce: podés medir exactamente qué hace cada usuario en tu tienda, desde que llega hasta que compra (o se va sin comprar).
+
+## Los eventos esenciales para cualquier eCommerce
+
+### 1. `view_item` — Vista de producto
+
+Se dispara cuando un usuario ve la página de un producto. Te permite saber cuáles son los productos más vistos y comparar esa métrica con los más comprados.
+
+**Lo que te dice:** qué productos generan interés pero no venta (problema de precio, descripción o imágenes).
+
+### 2. `add_to_cart` — Agregar al carrito
+
+Uno de los eventos más importantes. La tasa de `add_to_cart` ÷ `view_item` te da la **tasa de intención de compra** por producto.
+
+**Lo que te dice:** si el problema está en la ficha de producto o en el checkout.
+
+### 3. `begin_checkout` — Inicio del checkout
+
+Cuántos usuarios llegan al checkout. La diferencia entre `add_to_cart` y `begin_checkout` te muestra cuánta gente agrega al carrito pero nunca inicia el proceso de compra.
+
+**Lo que te dice:** si hay fricción en el carrito (costos de envío inesperados, registro obligatorio, etc.).
+
+### 4. `purchase` — Compra completada
+
+El evento más importante. Sin este bien configurado, todo lo demás pierde sentido. Debe incluir: transaction_id, value, currency, items.
+
+**Lo que te dice:** ingresos reales, ticket promedio y qué productos se compran juntos.
+
+### 5. `add_payment_info` y `add_shipping_info`
+
+Estos dos eventos intermedios del checkout te permiten identificar exactamente dónde abandona la gente el proceso de compra.
+
+**Lo que te dice:** si el abandono es en el paso de envío (costos altos) o en el pago (falta de métodos de pago o desconfianza).
+
+## El embudo que necesitás armar en GA4
+
+Con estos eventos podés construir un embudo de conversión que muestre:
+
+```
+Vista de producto → Agregar al carrito → Inicio checkout → Info de envío → Info de pago → Compra
+```
+
+Cada paso que pierde más del 50% de los usuarios es un problema que vale la pena resolver antes de aumentar el presupuesto en Ads.
+
+## Cómo implementarlos con GTM
+
+La forma más ordenada de implementar estos eventos es a través de Google Tag Manager. El proceso básico es:
+
+1. **Crear un Data Layer** en tu plataforma de eCommerce que "empuje" los datos del producto cuando ocurre cada evento
+2. **Crear variables en GTM** que lean esos datos del Data Layer
+3. **Crear triggers** que se activen en los momentos correctos
+4. **Crear tags de GA4** que envíen los eventos con los parámetros correctos
+
+Si usás Shopify, WooCommerce o Tiendanube, hay integraciones nativas que simplifican este proceso — aunque siempre recomiendo revisarlas porque suelen tener errores de configuración.
+
+## El error más común: duplicar eventos
+
+Si tenés tanto el código de GA4 instalado directamente en el sitio como un tag de GA4 en GTM, es probable que estés duplicando todos los eventos. Esto infla tus métricas y hace que los datos sean inútiles.
+
+**Cómo verificarlo:** en GA4, entrá a Informes → En tiempo real. Si ves que un solo pageview aparece dos veces, tenés duplicación.
+
+## Conversiones: qué marcar como conversión en GA4
+
+No todos los eventos son conversiones. En GA4, marcá como conversión solo los que representan una acción de alto valor:
+
+- `purchase` — siempre
+- `generate_lead` — si tenés formulario de contacto
+- `begin_checkout` — opcional, como conversión micro
+
+Tener demasiadas conversiones confunde los reportes y las campañas de Google Ads que optimizan por conversión.
+
+---
+
+Implementar GA4 correctamente desde el inicio te ahorra meses de decisiones a ciegas. Si querés que revisemos tu configuración actual o la implementemos desde cero, agendá una llamada de diagnóstico.
