@@ -1,7 +1,7 @@
 import "./css/style.css";
 
 import MetaPixel from "@/components/meta-pixel";
-
+import CrispChat from "@/components/crisp";
 import { Inter } from "next/font/google";
 import GoogleAnalytics from "@/components/google-analytics";
 
@@ -74,7 +74,8 @@ export default function RootLayout({
         </div>
 
         <GoogleAnalytics />
-        <MetaPixel />         
+        <MetaPixel />
+        <CrispChat />
       </body>
     </html>
   );
