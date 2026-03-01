@@ -3,19 +3,47 @@
 import { useEffect, useState } from "react";
 
 type MetaData = {
-  spend: string;
-  roas: string;
-  cvr: string;
-  revenue: string;
-  clicks: string;
-  impressions: string;
-  cpc: string;
-  cpm: string;
   hasData: boolean;
+  current: Record<string, string>;
+  changes: Record<string, number | null>;
 };
 
 type DatePreset = "today" | "last_7d" | "last_30d";
 type Account = { id: string; name: string };
+
+function Change({ value }: { value: number | null }) {
+  if (value === null) return null;
+  const positive = value >= 0;
+  const formatted = `${positive ? "+" : ""}${value.toFixed(1)}%`;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-xs font-medium ${
+        positive ? "text-emerald-600" : "text-red-500"
+      }`}
+    >
+      {positive ? "↑" : "↓"} {formatted}
+    </span>
+  );
+}
+
+// Métricas donde bajar es bueno (CPC, CPM, spend)
+const LOWER_IS_BETTER = ["cpc", "cpm", "spend"];
+
+function ChangeDirectional({ value, metricKey }: { value: number | null; metricKey: string }) {
+  if (value === null) return null;
+  const lowerIsBetter = LOWER_IS_BETTER.includes(metricKey);
+  const isGood = lowerIsBetter ? value <= 0 : value >= 0;
+  const formatted = `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
+  return (
+    <span
+      className={`inline-flex items-center gap-1 text-xs font-medium ${
+        isGood ? "text-emerald-600" : "text-red-500"
+      }`}
+    >
+      {value >= 0 ? "↑" : "↓"} {formatted}
+    </span>
+  );
+}
 
 export default function DashboardPage() {
   const [data, setData] = useState<MetaData | null>(null);
@@ -25,7 +53,6 @@ export default function DashboardPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
-  // Cargar cuentas al inicio
   useEffect(() => {
     fetch("/api/meta/accounts")
       .then((r) => r.json())
@@ -37,7 +64,6 @@ export default function DashboardPage() {
       });
   }, []);
 
-  // Cargar métricas cuando cambia cuenta o período
   useEffect(() => {
     if (!selectedAccount) return;
     setLoading(true);
@@ -52,15 +78,21 @@ export default function DashboardPage() {
       .finally(() => setLoading(false));
   }, [datePreset, selectedAccount]);
 
+  const periodLabel = {
+    today: "vs. ayer",
+    last_7d: "vs. 7 días anteriores",
+    last_30d: "vs. 30 días anteriores",
+  }[datePreset];
+
   const metrics = [
-    { label: "Invertido", value: loading ? "..." : data?.hasData ? `$${data.spend}` : "—", sub: "Meta Ads" },
-    { label: "ROAS", value: loading ? "..." : data?.hasData ? `${data.roas}x` : "—", sub: "Retorno sobre inversión" },
-    { label: "CVR", value: loading ? "..." : data?.hasData ? `${data.cvr}%` : "—", sub: "Tasa de conversión" },
-    { label: "Revenue", value: loading ? "..." : data?.hasData ? `$${data.revenue}` : "—", sub: "Ingresos generados" },
-    { label: "Clicks", value: loading ? "..." : data?.hasData ? data.clicks : "—", sub: "Clics en anuncios" },
-    { label: "Impresiones", value: loading ? "..." : data?.hasData ? data.impressions : "—", sub: "Veces mostrado" },
-    { label: "CPC", value: loading ? "..." : data?.hasData ? `$${data.cpc}` : "—", sub: "Costo por clic" },
-    { label: "CPM", value: loading ? "..." : data?.hasData ? `$${data.cpm}` : "—", sub: "Costo por mil impresiones" },
+    { key: "spend", label: "Invertido", prefix: "$", sub: "Meta Ads" },
+    { key: "roas", label: "ROAS", suffix: "x", sub: "Retorno sobre inversión" },
+    { key: "cvr", label: "CVR", suffix: "%", sub: "Tasa de conversión" },
+    { key: "revenue", label: "Revenue", prefix: "$", sub: "Ingresos generados" },
+    { key: "clicks", label: "Clicks", sub: "Clics en anuncios" },
+    { key: "impressions", label: "Impresiones", sub: "Veces mostrado" },
+    { key: "cpc", label: "CPC", prefix: "$", sub: "Costo por clic" },
+    { key: "cpm", label: "CPM", prefix: "$", sub: "Costo por mil impresiones" },
   ];
 
   return (
@@ -70,12 +102,12 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Performance de Meta Ads en tiempo real.
+            Performance de Meta Ads · {" "}
+            <span className="text-gray-400">{periodLabel}</span>
           </p>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          {/* Selector de cliente */}
           {accounts.length > 0 && (
             <select
               value={selectedAccount?.id ?? ""}
@@ -93,7 +125,6 @@ export default function DashboardPage() {
             </select>
           )}
 
-          {/* Filtro de fechas */}
           <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
             {(["today", "last_7d", "last_30d"] as DatePreset[]).map((preset) => (
               <button
@@ -120,24 +151,37 @@ export default function DashboardPage() {
       )}
 
       {/* Metrics grid */}
-      <div className="mb-8 grid grid-cols-4 gap-4">
-        {metrics.map((m) => (
-          <div
-            key={m.label}
-            className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
-          >
-            <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
-              {m.label}
-            </p>
-            <p className="mt-2 text-3xl font-bold text-gray-900">{m.value}</p>
-            <p className="mt-1 text-xs text-gray-500">{m.sub}</p>
-          </div>
-        ))}
+      <div className="grid grid-cols-4 gap-4">
+        {metrics.map((m) => {
+          const val = data?.current?.[m.key];
+          const change = data?.changes?.[m.key] ?? null;
+          const display = loading
+            ? "..."
+            : val !== undefined
+            ? `${m.prefix ?? ""}${val}${m.suffix ?? ""}`
+            : "—";
+
+          return (
+            <div
+              key={m.key}
+              className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+            >
+              <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
+                {m.label}
+              </p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">{display}</p>
+              <div className="mt-2 flex items-center justify-between">
+                <p className="text-xs text-gray-500">{m.sub}</p>
+                {!loading && <ChangeDirectional value={change} metricKey={m.key} />}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* No data */}
       {!loading && data && !data.hasData && (
-        <div className="rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
+        <div className="mt-8 rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
           <p className="text-4xl mb-4">📭</p>
           <h2 className="text-lg font-semibold text-gray-900 mb-2">
             Sin datos para este período
