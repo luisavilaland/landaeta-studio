@@ -72,6 +72,12 @@ function getComparisonDates(preset: string) {
   };
 }
 
+// ← Movida fuera del try, al nivel del módulo
+function pct(current: number, previous: number | null) {
+  if (!previous || previous === 0) return null;
+  return ((current - previous) / previous) * 100;
+}
+
 export async function GET(request: Request) {
   const session = await getServerSession();
   if (!session) {
@@ -100,12 +106,6 @@ export async function GET(request: Request) {
 
     if (!curr) {
       return NextResponse.json({ hasData: false });
-    }
-
-    // Calcular variación porcentual
-    function pct(current: number, previous: number | null) {
-      if (!previous || previous === 0) return null;
-      return ((current - previous) / previous) * 100;
     }
 
     return NextResponse.json({
