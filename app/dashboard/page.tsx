@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ReportModal from "@/components/report-modal";
 
 type MetaData = {
   hasData: boolean;
@@ -11,22 +12,6 @@ type MetaData = {
 type DatePreset = "today" | "last_7d" | "last_30d";
 type Account = { id: string; name: string };
 
-function Change({ value }: { value: number | null }) {
-  if (value === null) return null;
-  const positive = value >= 0;
-  const formatted = `${positive ? "+" : ""}${value.toFixed(1)}%`;
-  return (
-    <span
-      className={`inline-flex items-center gap-1 text-xs font-medium ${
-        positive ? "text-emerald-600" : "text-red-500"
-      }`}
-    >
-      {positive ? "↑" : "↓"} {formatted}
-    </span>
-  );
-}
-
-// Métricas donde bajar es bueno (CPC, CPM, spend)
 const LOWER_IS_BETTER = ["cpc", "cpm", "spend"];
 
 function ChangeDirectional({ value, metricKey }: { value: number | null; metricKey: string }) {
@@ -35,11 +20,7 @@ function ChangeDirectional({ value, metricKey }: { value: number | null; metricK
   const isGood = lowerIsBetter ? value <= 0 : value >= 0;
   const formatted = `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
   return (
-    <span
-      className={`inline-flex items-center gap-1 text-xs font-medium ${
-        isGood ? "text-emerald-600" : "text-red-500"
-      }`}
-    >
+    <span className={`inline-flex items-center gap-1 text-xs font-medium ${isGood ? "text-emerald-600" : "text-red-500"}`}>
       {value >= 0 ? "↑" : "↓"} {formatted}
     </span>
   );
@@ -52,6 +33,7 @@ export default function DashboardPage() {
   const [datePreset, setDatePreset] = useState<DatePreset>("last_30d");
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+  const [showReportModal, setShowReportModal] = useState(false);
 
   useEffect(() => {
     fetch("/api/meta/accounts")
@@ -102,12 +84,13 @@ export default function DashboardPage() {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Overview</h1>
           <p className="mt-1 text-sm text-gray-500">
-            Performance de Meta Ads · {" "}
+            Performance de Meta Ads ·{" "}
             <span className="text-gray-400">{periodLabel}</span>
           </p>
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
+          {/* Selector de cliente */}
           {accounts.length > 0 && (
             <select
               value={selectedAccount?.id ?? ""}
@@ -125,6 +108,16 @@ export default function DashboardPage() {
             </select>
           )}
 
+          {/* Botón reporte */}
+          <button
+            onClick={() => setShowReportModal(true)}
+            disabled={!selectedAccount || loading}
+            className="flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 transition-colors disabled:opacity-40"
+          >
+            <span>📧</span> Enviar reporte
+          </button>
+
+          {/* Filtro de fechas */}
           <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
             {(["today", "last_7d", "last_30d"] as DatePreset[]).map((preset) => (
               <button
@@ -162,10 +155,7 @@ export default function DashboardPage() {
             : "—";
 
           return (
-            <div
-              key={m.key}
-              className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
-            >
+            <div key={m.key} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
               <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
                 {m.label}
               </p>
@@ -183,13 +173,18 @@ export default function DashboardPage() {
       {!loading && data && !data.hasData && (
         <div className="mt-8 rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
           <p className="text-4xl mb-4">📭</p>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">
-            Sin datos para este período
-          </h2>
-          <p className="text-sm text-gray-500">
-            No hay campañas activas o no hubo actividad en este período.
-          </p>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Sin datos para este período</h2>
+          <p className="text-sm text-gray-500">No hay campañas activas o no hubo actividad en este período.</p>
         </div>
+      )}
+
+      {/* Modal de reporte */}
+      {showReportModal && selectedAccount && (
+        <ReportModal
+          accountId={selectedAccount.id}
+          clientName={selectedAccount.name}
+          onClose={() => setShowReportModal(false)}
+        />
       )}
     </div>
   );
