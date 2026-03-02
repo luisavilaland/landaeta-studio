@@ -29,29 +29,26 @@ export default async function DashboardLayout({
 
         {/* Nav */}
         <nav className="flex flex-col gap-1 flex-1">
-          <Link
-            href="/dashboard"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
-          >
+          <Link href="/dashboard" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
             <span>📊</span> Overview
           </Link>
-          <Link
-            href="/dashboard/meta"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
-          >
+          <Link href="/dashboard/meta" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
             <span>📘</span> Meta Ads
           </Link>
-          <Link
-            href="/dashboard/google"
-            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
-          >
+          <Link href="/dashboard/google" className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors">
             <span>🔍</span> Google Ads
           </Link>
         </nav>
 
         {/* Footer */}
-        <div className="border-t border-gray-100 pt-4">
-          <div className="mb-3 px-3">
+        <div className="border-t border-gray-100 pt-4 flex flex-col gap-1">
+          <Link
+            href="/dashboard/settings"
+            className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
+          >
+            <span>⚙️</span> Configuración
+          </Link>
+          <div className="px-3 py-2">
             <p className="text-xs font-medium text-gray-900">{session.user?.name ?? "Luis"}</p>
             <p className="text-xs text-gray-500">{session.user?.email}</p>
           </div>
