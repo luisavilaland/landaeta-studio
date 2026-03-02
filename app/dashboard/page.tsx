@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ReportModal from "@/components/report-modal";
+import TrendsChart from "@/components/trends-chart";
 
 type MetaData = {
   hasData: boolean;
@@ -14,13 +15,21 @@ type Account = { id: string; name: string };
 
 const LOWER_IS_BETTER = ["cpc", "cpm", "spend"];
 
-function ChangeDirectional({ value, metricKey }: { value: number | null; metricKey: string }) {
+function ChangeDirectional({
+  value,
+  metricKey,
+}: {
+  value: number | null;
+  metricKey: string;
+}) {
   if (value === null) return null;
   const lowerIsBetter = LOWER_IS_BETTER.includes(metricKey);
   const isGood = lowerIsBetter ? value <= 0 : value >= 0;
   const formatted = `${value >= 0 ? "+" : ""}${value.toFixed(1)}%`;
   return (
-    <span className={`inline-flex items-center gap-1 text-xs font-medium ${isGood ? "text-emerald-600" : "text-red-500"}`}>
+    <span
+      className={`inline-flex items-center gap-1 text-xs font-medium ${isGood ? "text-emerald-600" : "text-red-500"}`}
+    >
       {value >= 0 ? "↑" : "↓"} {formatted}
     </span>
   );
@@ -34,6 +43,8 @@ export default function DashboardPage() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [showReportModal, setShowReportModal] = useState(false);
+  const [trends, setTrends] = useState<any[]>([]);
+  const [trendsLoading, setTrendsLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/meta/accounts")
@@ -50,7 +61,9 @@ export default function DashboardPage() {
     if (!selectedAccount) return;
     setLoading(true);
     setError("");
-    fetch(`/api/meta?date_preset=${datePreset}&account_id=${selectedAccount.id}`)
+    fetch(
+      `/api/meta?date_preset=${datePreset}&account_id=${selectedAccount.id}`,
+    )
       .then((r) => r.json())
       .then((d) => {
         if (d.error) setError(d.error);
@@ -58,6 +71,19 @@ export default function DashboardPage() {
       })
       .catch(() => setError("Error al cargar datos"))
       .finally(() => setLoading(false));
+  }, [datePreset, selectedAccount]);
+
+  useEffect(() => {
+    if (!selectedAccount) return;
+    setTrendsLoading(true);
+    fetch(
+      `/api/meta/trends?date_preset=${datePreset}&account_id=${selectedAccount.id}`,
+    )
+      .then((r) => r.json())
+      .then((d) => {
+        if (!d.error) setTrends(d.points ?? []);
+      })
+      .finally(() => setTrendsLoading(false));
   }, [datePreset, selectedAccount]);
 
   const periodLabel = {
@@ -70,7 +96,12 @@ export default function DashboardPage() {
     { key: "spend", label: "Invertido", prefix: "$", sub: "Meta Ads" },
     { key: "roas", label: "ROAS", suffix: "x", sub: "Retorno sobre inversión" },
     { key: "cvr", label: "CVR", suffix: "%", sub: "Tasa de conversión" },
-    { key: "revenue", label: "Revenue", prefix: "$", sub: "Ingresos generados" },
+    {
+      key: "revenue",
+      label: "Revenue",
+      prefix: "$",
+      sub: "Ingresos generados",
+    },
     { key: "clicks", label: "Clicks", sub: "Clics en anuncios" },
     { key: "impressions", label: "Impresiones", sub: "Veces mostrado" },
     { key: "cpc", label: "CPC", prefix: "$", sub: "Costo por clic" },
@@ -119,19 +150,25 @@ export default function DashboardPage() {
 
           {/* Filtro de fechas */}
           <div className="flex items-center gap-1 rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
-            {(["today", "last_7d", "last_30d"] as DatePreset[]).map((preset) => (
-              <button
-                key={preset}
-                onClick={() => setDatePreset(preset)}
-                className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
-                  datePreset === preset
-                    ? "bg-blue-600 text-white"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                {preset === "today" ? "Hoy" : preset === "last_7d" ? "7 días" : "30 días"}
-              </button>
-            ))}
+            {(["today", "last_7d", "last_30d"] as DatePreset[]).map(
+              (preset) => (
+                <button
+                  key={preset}
+                  onClick={() => setDatePreset(preset)}
+                  className={`rounded-md px-3 py-1.5 text-sm font-medium transition-colors ${
+                    datePreset === preset
+                      ? "bg-blue-600 text-white"
+                      : "text-gray-600 hover:bg-gray-100"
+                  }`}
+                >
+                  {preset === "today"
+                    ? "Hoy"
+                    : preset === "last_7d"
+                      ? "7 días"
+                      : "30 días"}
+                </button>
+              ),
+            )}
           </div>
         </div>
       </div>
@@ -151,30 +188,64 @@ export default function DashboardPage() {
           const display = loading
             ? "..."
             : val !== undefined
-            ? `${m.prefix ?? ""}${val}${m.suffix ?? ""}`
-            : "—";
+              ? `${m.prefix ?? ""}${val}${m.suffix ?? ""}`
+              : "—";
 
           return (
-            <div key={m.key} className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+            <div
+              key={m.key}
+              className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
+            >
               <p className="text-xs font-medium uppercase tracking-widest text-gray-400">
                 {m.label}
               </p>
               <p className="mt-2 text-3xl font-bold text-gray-900">{display}</p>
               <div className="mt-2 flex items-center justify-between">
                 <p className="text-xs text-gray-500">{m.sub}</p>
-                {!loading && <ChangeDirectional value={change} metricKey={m.key} />}
+                {!loading && (
+                  <ChangeDirectional value={change} metricKey={m.key} />
+                )}
               </div>
             </div>
           );
         })}
       </div>
 
+      {/* Gráfico de tendencias */}
+      {!trendsLoading && trends.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="mb-4 flex items-center justify-between">
+            <div>
+              <h2 className="text-base font-semibold text-gray-900">
+                Evolución del ROAS y gasto
+              </h2>
+              <p className="text-xs text-gray-500 mt-0.5">
+                Invertido vs revenue con línea de ROAS diario
+              </p>
+            </div>
+          </div>
+          <TrendsChart data={trends} />
+        </div>
+      )}
+
+      {trendsLoading && (
+        <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+          <div className="h-80 flex items-center justify-center text-sm text-gray-400">
+            Cargando gráfico...
+          </div>
+        </div>
+      )}
+
       {/* No data */}
       {!loading && data && !data.hasData && (
         <div className="mt-8 rounded-2xl border border-dashed border-gray-300 bg-white p-12 text-center">
           <p className="text-4xl mb-4">📭</p>
-          <h2 className="text-lg font-semibold text-gray-900 mb-2">Sin datos para este período</h2>
-          <p className="text-sm text-gray-500">No hay campañas activas o no hubo actividad en este período.</p>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">
+            Sin datos para este período
+          </h2>
+          <p className="text-sm text-gray-500">
+            No hay campañas activas o no hubo actividad en este período.
+          </p>
         </div>
       )}
 
