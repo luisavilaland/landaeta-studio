@@ -10,11 +10,12 @@ export async function GET(request: Request) {
   }
 
   const { searchParams } = new URL(request.url);
-  const datePreset = searchParams.get("date_preset") ?? "last_30d";
   const accountId = searchParams.get("account_id") ?? process.env.META_AD_ACCOUNT_ID;
+  const datePreset = searchParams.get("date_preset") ?? "last_30d";
 
   try {
-    const url = `https://graph.facebook.com/v19.0/${accountId}/campaigns?fields=id,name,status,objective,insights.date_preset(${datePreset}){spend,impressions,clicks,cpc,cpm,actions,action_values}&limit=20&access_token=${ACCESS_TOKEN}`;
+    // Traer campañas con sus métricas en una sola llamada
+    const url = `https://graph.facebook.com/v19.0/${accountId}/campaigns?fields=id,name,status,objective,daily_budget,lifetime_budget,insights.date_preset(${datePreset}){spend,clicks,impressions,cpc,cpm,actions,action_values}&limit=50&access_token=${ACCESS_TOKEN}`;
 
     const res = await fetch(url);
     const data = await res.json();
@@ -25,40 +26,39 @@ export async function GET(request: Request) {
 
     const campaigns = (data.data ?? []).map((c: any) => {
       const insights = c.insights?.data?.[0];
-
       const spend = parseFloat(insights?.spend ?? "0");
-      const clicks = parseFloat(insights?.clicks ?? "0");
-      const impressions = parseFloat(insights?.impressions ?? "0");
-      const cpc = parseFloat(insights?.cpc ?? "0");
-      const cpm = parseFloat(insights?.cpm ?? "0");
 
-      const purchaseValue =
-        insights?.action_values?.find((a: any) => a.action_type === "omni_purchase")?.value ??
-        insights?.action_values?.find((a: any) => a.action_type === "purchase")?.value ??
-        "0";
-      const revenue = parseFloat(purchaseValue);
+      const revenue =
+        parseFloat(
+          insights?.action_values?.find((a: any) => a.action_type === "omni_purchase")?.value ??
+          insights?.action_values?.find((a: any) => a.action_type === "purchase")?.value ??
+          "0"
+        );
+
       const roas = spend > 0 ? revenue / spend : 0;
 
-      const purchases =
-        insights?.actions?.find((a: any) => a.action_type === "omni_purchase")?.value ??
-        insights?.actions?.find((a: any) => a.action_type === "purchase")?.value ??
-        "0";
-      const cvr = clicks > 0 ? (parseFloat(purchases) / clicks) * 100 : 0;
+      const dailyBudget = c.daily_budget
+        ? (parseFloat(c.daily_budget) / 100).toFixed(2)
+        : null;
+
+      const lifetimeBudget = c.lifetime_budget
+        ? (parseFloat(c.lifetime_budget) / 100).toFixed(2)
+        : null;
 
       return {
         id: c.id,
         name: c.name,
         status: c.status,
-        objective: c.objective,
+        objective: c.objective ?? "—",
+        dailyBudget,
+        lifetimeBudget,
         spend: spend.toFixed(2),
-        revenue: revenue.toFixed(2),
         roas: roas.toFixed(2),
-        cvr: cvr.toFixed(2),
-        clicks: clicks.toFixed(0),
-        impressions: impressions.toFixed(0),
-        cpc: cpc.toFixed(2),
-        cpm: cpm.toFixed(2),
-        hasInsights: !!insights,
+        clicks: insights?.clicks ?? "0",
+        impressions: insights?.impressions ?? "0",
+        cpc: parseFloat(insights?.cpc ?? "0").toFixed(2),
+        cpm: parseFloat(insights?.cpm ?? "0").toFixed(2),
+        hasData: !!insights,
       };
     });
 
