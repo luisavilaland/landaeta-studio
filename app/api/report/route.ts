@@ -149,7 +149,7 @@ export async function POST(request: Request) {
   }
 
   const { data, error } = await resend.emails.send({
-    from: "Landaeta Studio <onboarding@resend.dev>",
+    from: "Landaeta Studio <reportes@landaetastudio.com>",
     to: recipientEmail,
     subject: `Reporte de Performance · ${clientName} · Últimos 30 días`,
     html: buildEmailHtml(clientName, metrics),
