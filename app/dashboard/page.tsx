@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import ReportModal from "@/components/report-modal";
 import TrendsChart from "@/components/trends-chart";
-
+import TopCampaigns from "@/components/top-campaigns";
 type MetaData = {
   hasData: boolean;
   current: Record<string, string>;
@@ -226,6 +226,11 @@ export default function DashboardPage() {
           </div>
           <TrendsChart data={trends} />
         </div>
+      )}
+      
+      {/* Top y peores campañas */}
+      {!loading && selectedAccount && (
+        <TopCampaigns accountId={selectedAccount.id} datePreset={datePreset} />
       )}
 
       {trendsLoading && (
