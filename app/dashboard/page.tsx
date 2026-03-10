@@ -5,6 +5,7 @@ import ReportModal from "@/components/report-modal";
 import TrendsChart from "@/components/trends-chart";
 import TopCampaigns from "@/components/top-campaigns";
 import AccountHealth from "@/components/account-health";
+import ObjectiveChart from "@/components/objective-chart";
 
 type MetaData = {
   hasData: boolean;
@@ -233,9 +234,20 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Top y peores campañas */}
+      {/* Top campañas + Gráfico de objetivos */}
       {!loading && selectedAccount && (
-        <TopCampaigns accountId={selectedAccount.id} datePreset={datePreset} />
+        <div className="mt-6 grid grid-cols-3 gap-4">
+          <div className="col-span-2">
+            <TopCampaigns
+              accountId={selectedAccount.id}
+              datePreset={datePreset}
+            />
+          </div>
+          <ObjectiveChart
+            accountId={selectedAccount.id}
+            datePreset={datePreset}
+          />
+        </div>
       )}
 
       {trendsLoading && (
