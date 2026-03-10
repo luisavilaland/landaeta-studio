@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import ReportModal from "@/components/report-modal";
 import TrendsChart from "@/components/trends-chart";
 import TopCampaigns from "@/components/top-campaigns";
+import AccountHealth from "@/components/account-health";
+
 type MetaData = {
   hasData: boolean;
   current: Record<string, string>;
@@ -211,6 +213,9 @@ export default function DashboardPage() {
         })}
       </div>
 
+      {/* Salud de la cuenta */}
+      <AccountHealth data={data} loading={loading} />
+
       {/* Gráfico de tendencias */}
       {!trendsLoading && trends.length > 0 && (
         <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
@@ -227,7 +232,7 @@ export default function DashboardPage() {
           <TrendsChart data={trends} />
         </div>
       )}
-      
+
       {/* Top y peores campañas */}
       {!loading && selectedAccount && (
         <TopCampaigns accountId={selectedAccount.id} datePreset={datePreset} />
