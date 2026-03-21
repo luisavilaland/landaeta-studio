@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
 type Campaign = {
   id: string;
   name: string;
@@ -12,8 +10,7 @@ type Campaign = {
 };
 
 interface Props {
-  accountId: string;
-  datePreset: string;
+  campaigns: Campaign[];
 }
 
 function StatusDot({ status }: { status: string }) {
@@ -24,35 +21,13 @@ function StatusDot({ status }: { status: string }) {
   );
 }
 
-export default function TopCampaigns({ accountId, datePreset }: Props) {
-  const [campaigns, setCampaigns] = useState<Campaign[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (!accountId) return;
-    setLoading(true);
-    fetch(`/api/meta/campaigns?account_id=${accountId}&date_preset=${datePreset}`)
-      .then((r) => r.json())
-      .then((d) => {
-        const withRoas = (d.campaigns ?? []).filter((c: Campaign) => parseFloat(c.roas) > 0);
-        setCampaigns(withRoas);
-      })
-      .finally(() => setLoading(false));
-  }, [accountId, datePreset]);
-
-  if (loading) {
-    return (
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="h-48 flex items-center justify-center text-sm text-gray-400">
-          Cargando campañas...
-        </div>
-      </div>
-    );
-  }
-
+export default function TopCampaigns({ campaigns }: Props) {
   if (!campaigns.length) return null;
 
-  const sorted = [...campaigns].sort((a, b) => parseFloat(b.roas) - parseFloat(a.roas));
+  const withRoas = campaigns.filter((c) => parseFloat(c.roas) > 0);
+  if (!withRoas.length) return null;
+
+  const sorted = [...withRoas].sort((a, b) => parseFloat(b.roas) - parseFloat(a.roas));
   const top3 = sorted.slice(0, 3);
   const worst3 = sorted.slice(-3).reverse();
 
@@ -89,8 +64,7 @@ export default function TopCampaigns({ accountId, datePreset }: Props) {
   }
 
   return (
-    <div className="grid grid-cols-2 gap-4 mt-6">
-      {/* Top campañas */}
+    <div className="grid grid-cols-2 gap-4">
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <span className="text-lg">🏆</span>
@@ -99,14 +73,11 @@ export default function TopCampaigns({ accountId, datePreset }: Props) {
             <p className="text-xs text-gray-400">Mayor ROAS del período</p>
           </div>
         </div>
-        <div>
-          {top3.map((c, i) => (
-            <CampaignRow key={c.id} c={c} rank={i + 1} type="top" />
-          ))}
-        </div>
+        {top3.map((c, i) => (
+          <CampaignRow key={c.id} c={c} rank={i + 1} type="top" />
+        ))}
       </div>
 
-      {/* Peores campañas */}
       <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
         <div className="flex items-center gap-2 mb-4">
           <span className="text-lg">⚠️</span>
@@ -115,11 +86,9 @@ export default function TopCampaigns({ accountId, datePreset }: Props) {
             <p className="text-xs text-gray-400">Menor ROAS del período</p>
           </div>
         </div>
-        <div>
-          {worst3.map((c, i) => (
-            <CampaignRow key={c.id} c={c} rank={i + 1} type="worst" />
-          ))}
-        </div>
+        {worst3.map((c, i) => (
+          <CampaignRow key={c.id} c={c} rank={i + 1} type="worst" />
+        ))}
       </div>
     </div>
   );

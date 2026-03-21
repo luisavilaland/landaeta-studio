@@ -48,6 +48,8 @@ export default function DashboardPage() {
   const [showReportModal, setShowReportModal] = useState(false);
   const [trends, setTrends] = useState<any[]>([]);
   const [trendsLoading, setTrendsLoading] = useState(true);
+  const [campaigns, setCampaigns] = useState<any[]>([]);
+  const [campaignsLoading, setCampaignsLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/meta/accounts")
@@ -78,16 +80,32 @@ export default function DashboardPage() {
 
   useEffect(() => {
     if (!selectedAccount) return;
-    setTrendsLoading(true);
+    setCampaignsLoading(true);
     fetch(
-      `/api/meta/trends?date_preset=${datePreset}&account_id=${selectedAccount.id}`,
+      `/api/meta/campaigns?account_id=${selectedAccount.id}&date_preset=${datePreset}`,
     )
       .then((r) => r.json())
       .then((d) => {
-        if (!d.error) setTrends(d.points ?? []);
+        if (!d.error) setCampaigns(d.campaigns ?? []);
       })
-      .finally(() => setTrendsLoading(false));
+      .finally(() => setCampaignsLoading(false));
   }, [datePreset, selectedAccount]);
+
+  useEffect(() => {
+  if (!selectedAccount) return;
+  setTrendsLoading(true);
+  fetch(`/api/meta/trends?date_preset=${datePreset}&account_id=${selectedAccount.id}`)
+    .then((r) => r.json())
+    .then((d) => {
+      console.log("Trends response:", d);
+      if (!d.error) setTrends(d.points ?? []);
+    })
+    .catch((err) => {
+      console.error("Trends error:", err);
+      setTrends([]);
+    })
+    .finally(() => setTrendsLoading(false));
+}, [datePreset, selectedAccount]);
 
   const periodLabel = {
     today: "vs. ayer",
@@ -234,19 +252,13 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* Top campañas + Gráfico de objetivos */}
-      {!loading && selectedAccount && (
+      {/* TopCampaigns + ObjectiveChart*/}
+      {!campaignsLoading && campaigns.length > 0 && (
         <div className="mt-6 grid grid-cols-3 gap-4">
           <div className="col-span-2">
-            <TopCampaigns
-              accountId={selectedAccount.id}
-              datePreset={datePreset}
-            />
+            <TopCampaigns campaigns={campaigns} />
           </div>
-          <ObjectiveChart
-            accountId={selectedAccount.id}
-            datePreset={datePreset}
-          />
+          <ObjectiveChart campaigns={campaigns} />
         </div>
       )}
 

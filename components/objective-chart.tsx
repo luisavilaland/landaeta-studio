@@ -1,17 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
 type Campaign = {
-  id: string;
   objective: string;
   spend: string;
 };
 
 interface Props {
-  accountId: string;
-  datePreset: string;
+  campaigns: Campaign[];
 }
 
 const OBJECTIVE_LABELS: Record<string, string> = {
@@ -37,71 +34,44 @@ function CustomTooltip({ active, payload }: any) {
   );
 }
 
-export default function ObjectiveChart({ accountId, datePreset }: Props) {
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+export default function ObjectiveChart({ campaigns }: Props) {
+  if (!campaigns.length) return null;
 
-  useEffect(() => {
-    if (!accountId) return;
-    setLoading(true);
-    fetch(`/api/meta/campaigns?account_id=${accountId}&date_preset=${datePreset}`)
-      .then((r) => r.json())
-      .then((d) => {
-        const campaigns: Campaign[] = d.campaigns ?? [];
+  const grouped: Record<string, number> = {};
+  campaigns.forEach((c) => {
+    const label = OBJECTIVE_LABELS[c.objective] ?? c.objective;
+    grouped[label] = (grouped[label] ?? 0) + parseFloat(c.spend);
+  });
 
-        // Agrupar spend por objetivo
-        const grouped: Record<string, number> = {};
-        campaigns.forEach((c) => {
-          const label = OBJECTIVE_LABELS[c.objective] ?? c.objective;
-          grouped[label] = (grouped[label] ?? 0) + parseFloat(c.spend);
-        });
-
-        const total = Object.values(grouped).reduce((s, v) => s + v, 0);
-
-        const data = Object.entries(grouped)
-          .filter(([, v]) => v > 0)
-          .sort(([, a], [, b]) => b - a)
-          .map(([name, value]) => ({
-            name,
-            value: parseFloat(value.toFixed(2)),
-            percent: total > 0 ? ((value / total) * 100).toFixed(1) : "0",
-          }));
-
-        setChartData(data);
-      })
-      .finally(() => setLoading(false));
-  }, [accountId, datePreset]);
-
-  if (loading) {
-    return (
-      <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
-        <div className="h-64 flex items-center justify-center text-sm text-gray-400">
-          Cargando distribución...
-        </div>
-      </div>
-    );
-  }
+  const total = Object.values(grouped).reduce((s, v) => s + v, 0);
+  const chartData = Object.entries(grouped)
+    .filter(([, v]) => v > 0)
+    .sort(([, a], [, b]) => b - a)
+    .map(([name, value]) => ({
+      name,
+      value: parseFloat(value.toFixed(2)),
+      percent: total > 0 ? ((value / total) * 100).toFixed(1) : "0",
+    }));
 
   if (!chartData.length) return null;
 
   return (
     <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
       <div className="mb-4">
-        <h3 className="text-sm font-semibold text-gray-900">Distribución del spend por objetivo</h3>
-        <p className="text-xs text-gray-400 mt-0.5">Cuánto del presupuesto va a cada tipo de campaña</p>
+        <h3 className="text-sm font-semibold text-gray-900">Distribución por objetivo</h3>
+        <p className="text-xs text-gray-400 mt-0.5">Spend por tipo de campaña</p>
       </div>
 
-      <div className="flex items-center gap-6">
-        {/* Gráfico */}
-        <div className="flex-shrink-0" style={{ width: 200, height: 200 }}>
+      <div className="flex flex-col items-center gap-4">
+        <div style={{ width: 180, height: 180 }}>
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
                 data={chartData}
                 cx="50%"
                 cy="50%"
-                innerRadius={55}
-                outerRadius={85}
+                innerRadius={50}
+                outerRadius={80}
                 paddingAngle={3}
                 dataKey="value"
               >
@@ -114,20 +84,16 @@ export default function ObjectiveChart({ accountId, datePreset }: Props) {
           </ResponsiveContainer>
         </div>
 
-        {/* Leyenda manual */}
-        <div className="flex flex-col gap-2 flex-1">
+        <div className="w-full flex flex-col gap-2">
           {chartData.map((item, i) => (
             <div key={item.name} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <div
-                  className="h-2.5 w-2.5 rounded-full flex-shrink-0"
-                  style={{ backgroundColor: COLORS[i % COLORS.length] }}
-                />
-                <span className="text-sm text-gray-700">{item.name}</span>
+                <div className="h-2 w-2 rounded-full flex-shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
+                <span className="text-xs text-gray-700">{item.name}</span>
               </div>
-              <div className="flex items-center gap-3 ml-4">
+              <div className="flex items-center gap-2">
                 <span className="text-xs text-gray-400">{item.percent}%</span>
-                <span className="text-sm font-medium text-gray-900">${item.value}</span>
+                <span className="text-xs font-medium text-gray-900">${item.value}</span>
               </div>
             </div>
           ))}
